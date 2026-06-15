@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>今夜なに作る? (登録用)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FBF6EE;
+    --card: #FFFCF5;
+    --ink: #2E2A24;
+    --ink-soft: #6B6259;
+    --accent: #C1632F;
+    --accent-dark: #A8501F;
+    --sage: #6B8E5A;
+    --sage-bg: #E7EFE2;
+    --clay: #B85C5C;
+    --clay-bg: #F5E3E1;
+    --gold: #D4A23A;
+    --gold-bg: #F7EDD9;
+    --line: #E3D8C5;
+    --shadow: rgba(46, 42, 36, 0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 92% 8%, rgba(193, 99, 47, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 6% 90%, rgba(107, 142, 90, 0.07) 0%, transparent 45%);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  header h1 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    position: relative;
+    display: inline-block;
+  }
+
+  header h1::after {
+    content: '';
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    bottom: -4px;
+    height: 8px;
+    background: var(--gold-bg);
+    z-index: -1;
+    transform: rotate(-0.5deg);
+  }
+
+  header p {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.03em;
+  }
+
+  .sync-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 12px;
+  }
+  .sync-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #c9c2b4;
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .sync-dot.ok { background: var(--sage); }
+  .sync-dot.err { background: var(--clay); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 5px;
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 11px 0;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+  }
+
+  .tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.25s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === PICK VIEW === */
+  .pick-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px 18px;
+    box-shadow: 0 4px 18px var(--shadow);
+    margin-bottom: 20px;
+  }
+
+  .pick-card h2 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pick-card h2::before {
+    content: '';
+    width: 6px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .filter-chip {
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .filter-chip[data-active="true"] {
+    border-color: transparent;
+    color: #fff;
+  }
+
+  .filter-chip[data-val="短時間"][data-active="true"] { background: var(--sage); }
+  .filter-chip[data-val="普通"][data-active="true"] { background: var(--gold); }
+  .filter-chip[data-val="時間がかかる"][data-active="true"] { background: var(--clay); }
+  .filter-chip[data-val="all"][data-active="true"] { background: var(--accent); }
+
+  .roll-btn {
+    width: 100%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 17px;
+    letter-spacing: 0.08em;
+    padding: 18px 0;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+
+  .roll-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--accent-dark);
+  }
+
+  .roll-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .empty-note {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin-top: 10px;
+  }
+
+  /* Result card */
+  .result-zone { min-height: 4px; }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px var(--shadow);
+    position: relative;
+  }
+
+  .result-card.shuffling { animation: shuffle 0.5s ease-in-out; }
+
+  @keyframes shuffle {
+    0% { transform: scale(1) rotate(0deg); opacity: 1; }
+    25% { transform: scale(0.96) rotate(-2deg); opacity: 0.6; }
+    50% { transform: scale(0.96) rotate(2deg); opacity: 0.6; }
+    75% { transform: scale(0.98) rotate(-1deg); opacity: 0.8; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .result-photo {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    background: var(--gold-bg);
+  }
+
+  .result-body { padding: 22px 20px; position: relative; }
+
+  .result-stamp {
+    position: absolute;
+    top: 16px;
+    right: -28px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 5px 34px;
+    transform: rotate(28deg);
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+
+  .result-title {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 23px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    padding-right: 50px;
+  }
+
+  .result-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+  }
+
+  .tag.time-短時間 { background: var(--sage-bg); color: var(--sage); }
+  .tag.time-普通 { background: var(--gold-bg); color: var(--gold); }
+  .tag.time-時間がかかる { background: var(--clay-bg); color: var(--clay); }
+  .tag.ingredient { background: #EEE8F2; color: #8167A3; }
+
+  .result-section { margin-bottom: 12px; }
+
+  .result-section .label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+
+  .result-section .content {
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .result-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+  .ghost-btn {
+    flex: 1;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--ink-soft);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 11px 0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* === LIST / FORM VIEW === */
+  .add-toggle {
+    width: 100%;
+    border: 1.5px dashed var(--line);
+    background: var(--card);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: background 0.15s;
+  }
+  .add-toggle:hover { background: var(--gold-bg); }
+
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 18px;
+    display: none;
+  }
+  .form-card.open { display: block; animation: fadeIn 0.2s ease; }
+
+  .form-card h3 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .field { margin-bottom: 14px; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+
+  .field input[type="text"],
+  .field textarea {
+    width: 100%;
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+    resize: vertical;
+  }
+
+  .field input:focus, .field textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+
+  .field textarea { min-height: 80px; line-height: 1.6; }
+
+  /* Photo picker */
+  .photo-picker {
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+    background: var(--paper);
+    text-align: center;
+    padding: 18px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .photo-picker:hover { border-color: var(--accent); background: var(--gold-bg); }
+  .photo-picker input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .photo-picker .hint {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+  .photo-preview-wrap { position: relative; }
+  .photo-preview {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+  }
+  .photo-remove {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: rgba(46,42,36,0.65);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    width: 30px; height: 30px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .pill-select { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .pill-select .opt {
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+  }
+
+  .pill-select .opt[data-active="true"] {
+    border-color: transparent;
+    color: #fff;
+  }
+  .pill-select .opt[data-val="短時間"][data-active="true"] { background: var(--sage); }
+  .pill-select .opt[data-val="普通"][data-active="true"] { background: var(--gold); }
+  .pill-select .opt[data-val="時間がかかる"][data-active="true"] { background: var(--clay); }
+
+  .form-actions { display: flex; gap: 10px; margin-top: 6px; }
+
+  .save-btn, .cancel-btn {
+    flex: 1;
+    border: none;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 0;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .save-btn { background: var(--accent); color: #fff; }
+  .save-btn:disabled { opacity: 0.6; }
+  .cancel-btn { background: var(--line); color: var(--ink-soft); }
+
+  /* Recipe list */
+  .recipe-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+
+  .recipe-list-header h2 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 16px;
+  }
+
+  .recipe-count { font-size: 12px; color: var(--ink-soft); }
+
+  .recipe-item {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .recipe-thumb {
+    width: 56px; height: 56px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--gold-bg);
+  }
+  .recipe-thumb.placeholder {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+
+  .recipe-item .info { flex: 1; min-width: 0; }
+
+  .recipe-item .name {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .recipe-item .meta { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .recipe-item .btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .icon-btn {
+    border: none;
+    background: var(--paper);
+    color: var(--ink-soft);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+  }
+  .icon-btn:hover { background: var(--clay-bg); color: var(--clay); }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--ink-soft); }
+  .empty-state .big { font-size: 38px; margin-bottom: 10px; }
+  .empty-state p { font-size: 13px; line-height: 1.8; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(251,246,238,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    font-weight: 700;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .loading-overlay.hidden { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .result-card.shuffling { animation: none; }
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay">よみこみ中…</div>
+
+<div class="wrap">
+
+  <header>
+    <h1>今夜なに作る?</h1>
+    <p>登録レシピから、今日の気分で1品おまかせ選び</p>
+    <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncText">接続中…</span></div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-view="pick">今日のごはん</div>
+    <div class="tab" data-view="list">レシピ帖</div>
+  </div>
+
+  <!-- PICK VIEW -->
+  <div class="view active" id="view-pick">
+    <div class="pick-card">
+      <h2>調理時間で絞る</h2>
+      <div class="filter-row" id="filterRow">
+        <div class="filter-chip" data-val="all" data-active="true">すべて</div>
+        <div class="filter-chip" data-val="短時間" data-active="false">短時間(15分以内)</div>
+        <div class="filter-chip" data-val="普通" data-active="false">普通(30分前後)</div>
+        <div class="filter-chip" data-val="時間がかかる" data-active="false">時間がかかる(1時間以上)</div>
+      </div>
+      <button class="roll-btn" id="rollBtn" disabled>今日のごはんを決める</button>
+      <div class="empty-note" id="emptyNote" style="display:none;">この条件のレシピがまだ登録されていません</div>
+    </div>
+
+    <div class="result-zone" id="resultZone"></div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div class="view" id="view-list">
+    <button class="add-toggle" id="addToggle">+ 新しいレシピを登録する</button>
+
+    <div class="form-card" id="formCard">
+      <h3 id="formTitle">レシピを登録</h3>
+
+      <div class="field">
+        <label>料理の写真(任意)</label>
+        <div id="photoArea">
+          <div class="photo-picker" id="photoPicker">
+            <input type="file" accept="image/*" id="f-photo">
+            <div class="hint">📷 タップして写真を選ぶ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>料理名</label>
+        <input type="text" id="f-name" placeholder="例: 鶏むね肉のチーズ焼き">
+      </div>
+      <div class="field">
+        <label>調理時間</label>
+        <div class="pill-select" id="f-time">
+          <div class="opt" data-val="短時間">短時間(15分以内)</div>
+          <div class="opt" data-val="普通">普通(30分前後)</div>
+          <div class="opt" data-val="時間がかかる">時間がかかる(1時間以上)</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>主菜の材料(肉・魚など)</label>
+        <input type="text" id="f-ingredient" placeholder="例: 鶏むね肉、ピザ用チーズ">
+      </div>
+      <div class="field">
+        <label>簡単なレシピ・メモ</label>
+        <textarea id="f-recipe" placeholder="例: 1. 鶏むね肉を開いて塩こしょう&#10;2. チーズを挟んで巻く&#10;3. フライパンで両面焼く"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="cancel-btn" id="cancelBtn">キャンセル</button>
+        <button class="save-btn" id="saveBtn">保存する</button>
+      </div>
+    </div>
+
+    <div class="recipe-list-header">
+      <h2>登録済みレシピ</h2>
+      <span class="recipe-count" id="recipeCount"></span>
+    </div>
+
+    <div id="recipeList"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ===== ここにFirebaseの設定を入れてください =====
+const firebaseConfig = {
+  apiKey: "AIzaSyAYNBaC8cHJBnZEaFmzd_9FpYNsQ0MRIkI",
+  authDomain: "dinner-menu-qtan.firebaseapp.com",
+  projectId: "dinner-menu-qtan",
+  storageBucket: "dinner-menu-qtan.firebasestorage.app",
+  messagingSenderId: "294633128403",
+  appId: "1:294633128403:web:158214a1ec2775c1fc6f26"
+};
+// ================================================
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const recipesCol = collection(db, "recipes");
+
+let recipes = [];
+let editingId = null;
+let activeFilter = 'all';
+let lastPickedId = null;
+let currentPhotoData = null; // base64 string or null
+let firstSnapshotReceived = false;
+
+const syncDot = document.getElementById('syncDot');
+const syncText = document.getElementById('syncText');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+function setSyncState(state) {
+  syncDot.classList.remove('ok', 'err');
+  if (state === 'ok') {
+    syncDot.classList.add('ok');
+    syncText.textContent = '同期中';
+  } else if (state === 'err') {
+    syncDot.classList.add('err');
+    syncText.textContent = '接続エラー';
+  } else {
+    syncText.textContent = '接続中…';
+  }
+}
+
+// --- Realtime listener ---
+onSnapshot(recipesCol, (snapshot) => {
+  recipes = [];
+  snapshot.forEach(docSnap => {
+    recipes.push({ id: docSnap.id, ...docSnap.data() });
+  });
+  // sort by createdAt for stable order
+  recipes.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+  setSyncState('ok');
+  if (!firstSnapshotReceived) {
+    firstSnapshotReceived = true;
+    loadingOverlay.classList.add('hidden');
+  }
+  document.getElementById('rollBtn').disabled = false;
+  updateEmptyNote();
+  renderRecipeList();
+}, (error) => {
+  console.error(error);
+  setSyncState('err');
+  loadingOverlay.classList.add('hidden');
+});
+
+// --- Toast ---
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// --- Tabs ---
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+    if (tab.dataset.view === 'list') renderRecipeList();
+  });
+});
+
+// --- Filter chips ---
+document.getElementById('filterRow').addEventListener('click', (e) => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('.filter-chip').forEach(c => c.dataset.active = 'false');
+  chip.dataset.active = 'true';
+  activeFilter = chip.dataset.val;
+  updateEmptyNote();
+});
+
+function getFilteredRecipes() {
+  if (activeFilter === 'all') return recipes;
+  return recipes.filter(r => r.time === activeFilter);
+}
+
+function updateEmptyNote() {
+  const filtered = getFilteredRecipes();
+  document.getElementById('emptyNote').style.display = filtered.length === 0 ? 'block' : 'none';
+  document.getElementById('rollBtn').disabled = filtered.length === 0;
+}
+
+// --- Roll button ---
+document.getElementById('rollBtn').addEventListener('click', () => {
+  const filtered = getFilteredRecipes();
+  if (filtered.length === 0) return;
+
+  let pick;
+  if (filtered.length > 1) {
+    const candidates = filtered.filter(r => r.id !== lastPickedId);
+    pick = candidates.length > 0
+      ? candidates[Math.floor(Math.random() * candidates.length)]
+      : filtered[Math.floor(Math.random() * filtered.length)];
+  } else {
+    pick = filtered[0];
+  }
+  lastPickedId = pick.id;
+  renderResult(pick, true);
+});
+
+function renderResult(recipe, animate) {
+  const zone = document.getElementById('resultZone');
+  const timeLabel = recipe.time;
+  zone.innerHTML = `
+    <div class="result-card ${animate ? 'shuffling' : ''}" id="resultCard">
+      ${recipe.photo ? `<img class="result-photo" src="${recipe.photo}" alt="">` : ''}
+      <div class="result-body">
+        <div class="result-stamp">本日のごはん</div>
+        <div class="result-title">${escapeHtml(recipe.name)}</div>
+        <div class="result-tags">
+          <span class="tag time-${timeLabel}">${timeLabel}</span>
+          ${recipe.ingredient ? `<span class="tag ingredient">${escapeHtml(recipe.ingredient)}</span>` : ''}
+        </div>
+        ${recipe.recipe ? `
+        <div class="result-section">
+          <div class="label">作り方メモ</div>
+          <div class="content">${escapeHtml(recipe.recipe)}</div>
+        </div>` : ''}
+        <div class="result-actions">
+          <button class="ghost-btn" id="reRollBtn">もう一回</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('reRollBtn').addEventListener('click', () => {
+    document.getElementById('rollBtn').click();
+  });
+}
+
+// --- Add toggle / form ---
+const formCard = document.getElementById('formCard');
+const addToggle = document.getElementById('addToggle');
+
+addToggle.addEventListener('click', () => {
+  openForm(null);
+});
+
+document.getElementById('cancelBtn').addEventListener('click', closeForm);
+
+document.getElementById('f-time').addEventListener('click', (e) => {
+  const opt = e.target.closest('.opt');
+  if (!opt) return;
+  document.querySelectorAll('#f-time .opt').forEach(o => o.dataset.active = 'false');
+  opt.dataset.active = 'true';
+});
+
+// --- Photo handling ---
+function renderPhotoArea() {
+  const area = document.getElementById('photoArea');
+  if (currentPhotoData) {
+    area.innerHTML = `
+      <div class="photo-preview-wrap">
+        <img class="photo-preview" src="${currentPhotoData}" alt="">
+        <button class="photo-remove" id="photoRemoveBtn" type="button">✕</button>
+      </div>
+    `;
+    document.getElementById('photoRemoveBtn').addEventListener('click', () => {
+      currentPhotoData = null;
+      renderPhotoArea();
+    });
+  } else {
+    area.innerHTML = `
+      <div class="photo-picker" id="photoPicker">
+        <input type="file" accept="image/*" id="f-photo">
+        <div class="hint">📷 タップして写真を選ぶ</div>
+      </div>
+    `;
+    document.getElementById('f-photo').addEventListener('change', handlePhotoSelect);
+  }
+}
+
+function handlePhotoSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      // Resize to max 800px on the longest side, compress as JPEG
+      const maxSize = 800;
+      let { width, height } = img;
+      if (width > height && width > maxSize) {
+        height = Math.round(height * (maxSize / width));
+        width = maxSize;
+      } else if (height > maxSize) {
+        width = Math.round(width * (maxSize / height));
+        height = maxSize;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      currentPhotoData = canvas.toDataURL('image/jpeg', 0.7);
+      renderPhotoArea();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('f-photo').addEventListener('change', handlePhotoSelect);
+
+function openForm(recipe) {
+  formCard.classList.add('open');
+  if (recipe) {
+    editingId = recipe.id;
+    document.getElementById('formTitle').textContent = 'レシピを編集';
+    document.getElementById('f-name').value = recipe.name;
+    document.getElementById('f-ingredient').value = recipe.ingredient || '';
+    document.getElementById('f-recipe').value = recipe.recipe || '';
+    currentPhotoData = recipe.photo || null;
+    document.querySelectorAll('#f-time .opt').forEach(o => {
+      o.dataset.active = (o.dataset.val === recipe.time) ? 'true' : 'false';
+    });
+  } else {
+    editingId = null;
+    document.getElementById('formTitle').textContent = 'レシピを登録';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-ingredient').value = '';
+    document.getElementById('f-recipe').value = '';
+    currentPhotoData = null;
+    document.querySelectorAll('#f-time .opt').forEach((o, i) => {
+      o.dataset.active = (i === 1) ? 'true' : 'false'; // default: 普通
+    });
+  }
+  renderPhotoArea();
+  formCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeForm() {
+  formCard.classList.remove('open');
+  editingId = null;
+  currentPhotoData = null;
+}
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const name = document.getElementById('f-name').value.trim();
+  const ingredient = document.getElementById('f-ingredient').value.trim();
+  const recipeText = document.getElementById('f-recipe').value.trim();
+  const timeOpt = document.querySelector('#f-time .opt[data-active="true"]');
+  const time = timeOpt ? timeOpt.dataset.val : '普通';
+
+  if (!name) {
+    showToast('料理名を入力してください');
+    return;
+  }
+
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = '保存中…';
+
+  try {
+    const data = {
+      name, time, ingredient, recipe: recipeText,
+      photo: currentPhotoData || null,
+    };
+
+    if (editingId) {
+      await setDoc(doc(recipesCol, editingId), {
+        ...data,
+        createdAt: recipes.find(r => r.id === editingId)?.createdAt || Date.now()
+      });
+      showToast('更新しました');
+    } else {
+      const newId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      await setDoc(doc(recipesCol, newId), { ...data, createdAt: Date.now() });
+      showToast('登録しました');
+    }
+    closeForm();
+  } catch (err) {
+    console.error(err);
+    showToast('保存に失敗しました。通信状況を確認してください');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = '保存する';
+  }
+});
+
+// --- Recipe list ---
+function renderRecipeList() {
+  const list = document.getElementById('recipeList');
+  const countEl = document.getElementById('recipeCount');
+  countEl.textContent = recipes.length > 0 ? `${recipes.length}件` : '';
+
+  if (recipes.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🍳</div>
+        <p>まだレシピがありません。<br>「+ 新しいレシピを登録する」から追加しましょう。</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = recipes.map(r => `
+    <div class="recipe-item" data-id="${r.id}">
+      ${r.photo
+        ? `<img class="recipe-thumb" src="${r.photo}" alt="">`
+        : `<div class="recipe-thumb placeholder">🍽️</div>`}
+      <div class="info">
+        <div class="name">${escapeHtml(r.name)}</div>
+        <div class="meta">
+          <span class="tag time-${r.time}">${r.time}</span>
+          ${r.ingredient ? `<span class="tag ingredient">${escapeHtml(r.ingredient)}</span>` : ''}
+        </div>
+      </div>
+      <div class="btns">
+        <button class="icon-btn edit-btn" title="編集" aria-label="編集">✏️</button>
+        <button class="icon-btn delete-btn" title="削除" aria-label="削除">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = e.target.closest('.recipe-item').dataset.id;
+      const r = recipes.find(r => r.id === id);
+      openForm(r);
+    });
+  });
+
+  list.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const item = e.target.closest('.recipe-item');
+      const id = item.dataset.id;
+      const r = recipes.find(r => r.id === id);
+      if (confirm(`「${r.name}」を削除しますか?`)) {
+        try {
+          await deleteDoc(doc(recipesCol, id));
+          showToast('削除しました');
+        } catch (err) {
+          console.error(err);
+          showToast('削除に失敗しました');
+        }
+      }
+    });
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>

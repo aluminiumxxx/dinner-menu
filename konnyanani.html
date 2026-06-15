@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>今夜なに作る?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FBF6EE;
+    --card: #FFFCF5;
+    --ink: #2E2A24;
+    --ink-soft: #6B6259;
+    --accent: #C1632F;
+    --accent-dark: #A8501F;
+    --sage: #6B8E5A;
+    --sage-bg: #E7EFE2;
+    --clay: #B85C5C;
+    --clay-bg: #F5E3E1;
+    --gold: #D4A23A;
+    --gold-bg: #F7EDD9;
+    --line: #E3D8C5;
+    --shadow: rgba(46, 42, 36, 0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 92% 8%, rgba(193, 99, 47, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 6% 90%, rgba(107, 142, 90, 0.07) 0%, transparent 45%);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  header { text-align: center; margin-bottom: 24px; position: relative; }
+
+  header h1 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    position: relative;
+    display: inline-block;
+  }
+
+  header h1::after {
+    content: '';
+    position: absolute;
+    left: 6%; right: 6%; bottom: -4px;
+    height: 8px;
+    background: var(--gold-bg);
+    z-index: -1;
+    transform: rotate(-0.5deg);
+  }
+
+  header p { margin-top: 8px; font-size: 12px; color: var(--ink-soft); letter-spacing: 0.03em; }
+
+  .sync-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 10px;
+    font-size: 11px; font-weight: 700; color: var(--ink-soft);
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 12px;
+  }
+  .sync-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #c9c2b4; flex-shrink: 0; transition: background 0.3s;
+  }
+  .sync-dot.ok { background: var(--sage); }
+  .sync-dot.err { background: var(--clay); }
+
+  .pick-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px 18px;
+    box-shadow: 0 4px 18px var(--shadow);
+    margin-bottom: 20px;
+  }
+
+  .pick-card h2 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .pick-card h2::before {
+    content: '';
+    width: 6px; height: 18px;
+    background: var(--accent);
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+  .filter-chip {
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-size: 13px; font-weight: 700; color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .filter-chip[data-active="true"] { border-color: transparent; color: #fff; }
+  .filter-chip[data-val="短時間"][data-active="true"] { background: var(--sage); }
+  .filter-chip[data-val="普通"][data-active="true"] { background: var(--gold); }
+  .filter-chip[data-val="時間がかかる"][data-active="true"] { background: var(--clay); }
+  .filter-chip[data-val="all"][data-active="true"] { background: var(--accent); }
+
+  .roll-btn {
+    width: 100%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    padding: 20px 0;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+
+  .roll-btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--accent-dark); }
+  .roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .empty-note { text-align: center; color: var(--ink-soft); font-size: 13px; margin-top: 10px; }
+
+  .result-zone { min-height: 4px; }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px var(--shadow);
+    position: relative;
+  }
+
+  .result-card.shuffling { animation: shuffle 0.5s ease-in-out; }
+
+  @keyframes shuffle {
+    0% { transform: scale(1) rotate(0deg); opacity: 1; }
+    25% { transform: scale(0.96) rotate(-2deg); opacity: 0.6; }
+    50% { transform: scale(0.96) rotate(2deg); opacity: 0.6; }
+    75% { transform: scale(0.98) rotate(-1deg); opacity: 0.8; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .result-photo {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    background: var(--gold-bg);
+  }
+
+  .result-body { padding: 22px 20px; position: relative; }
+
+  .result-stamp {
+    position: absolute;
+    top: 16px; right: -28px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 5px 34px;
+    transform: rotate(28deg);
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+
+  .result-title {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 23px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    padding-right: 50px;
+  }
+
+  .result-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+
+  .tag { font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px; letter-spacing: 0.04em; }
+  .tag.time-短時間 { background: var(--sage-bg); color: var(--sage); }
+  .tag.time-普通 { background: var(--gold-bg); color: var(--gold); }
+  .tag.time-時間がかかる { background: var(--clay-bg); color: var(--clay); }
+  .tag.ingredient { background: #EEE8F2; color: #8167A3; }
+
+  .result-section { margin-bottom: 12px; }
+  .result-section .label {
+    font-size: 11px; font-weight: 700; color: var(--ink-soft);
+    letter-spacing: 0.1em; margin-bottom: 4px; text-transform: uppercase;
+  }
+  .result-section .content { font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
+
+  .result-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+  .ghost-btn {
+    flex: 1;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--ink-soft);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 11px 0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--ink-soft); }
+  .empty-state .big { font-size: 38px; margin-bottom: 10px; }
+  .empty-state p { font-size: 13px; line-height: 1.8; }
+
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(251,246,238,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    font-weight: 700; color: var(--ink-soft); font-size: 14px;
+  }
+  .loading-overlay.hidden { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .result-card.shuffling { animation: none; }
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay">よみこみ中…</div>
+
+<div class="wrap">
+  <header>
+    <h1>今夜なに作る?</h1>
+    <p>条件を選んで、ボタンで今日の1品をおまかせ</p>
+    <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncText">接続中…</span></div>
+  </header>
+
+  <div class="pick-card">
+    <h2>調理時間で絞る</h2>
+    <div class="filter-row" id="filterRow">
+      <div class="filter-chip" data-val="all" data-active="true">すべて</div>
+      <div class="filter-chip" data-val="短時間" data-active="false">短時間(15分以内)</div>
+      <div class="filter-chip" data-val="普通" data-active="false">普通(30分前後)</div>
+      <div class="filter-chip" data-val="時間がかかる" data-active="false">時間がかかる(1時間以上)</div>
+    </div>
+    <button class="roll-btn" id="rollBtn" disabled>今日のごはんを決める</button>
+    <div class="empty-note" id="emptyNote" style="display:none;">この条件のレシピがまだ登録されていません</div>
+  </div>
+
+  <div class="result-zone" id="resultZone">
+    <div class="empty-state">
+      <div class="big">🍚</div>
+      <p>ボタンを押すと、今日のごはんが決まります。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ===== ここにFirebaseの設定を入れてください(奥さん版と同じ内容) =====
+const firebaseConfig = {
+  apiKey: "AIzaSyAYNBaC8cHJBnZEaFmzd_9FpYNsQ0MRIkI",
+  authDomain: "dinner-menu-qtan.firebaseapp.com",
+  projectId: "dinner-menu-qtan",
+  storageBucket: "dinner-menu-qtan.firebasestorage.app",
+  messagingSenderId: "294633128403",
+  appId: "1:294633128403:web:158214a1ec2775c1fc6f26"
+};
+// ====================================================================
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const recipesCol = collection(db, "recipes");
+
+let recipes = [];
+let activeFilter = 'all';
+let lastPickedId = null;
+let firstSnapshotReceived = false;
+
+const syncDot = document.getElementById('syncDot');
+const syncText = document.getElementById('syncText');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+function setSyncState(state) {
+  syncDot.classList.remove('ok', 'err');
+  if (state === 'ok') {
+    syncDot.classList.add('ok');
+    syncText.textContent = '同期中';
+  } else if (state === 'err') {
+    syncDot.classList.add('err');
+    syncText.textContent = '接続エラー';
+  } else {
+    syncText.textContent = '接続中…';
+  }
+}
+
+onSnapshot(recipesCol, (snapshot) => {
+  recipes = [];
+  snapshot.forEach(docSnap => {
+    recipes.push({ id: docSnap.id, ...docSnap.data() });
+  });
+  setSyncState('ok');
+  if (!firstSnapshotReceived) {
+    firstSnapshotReceived = true;
+    loadingOverlay.classList.add('hidden');
+  }
+  updateEmptyNote();
+}, (error) => {
+  console.error(error);
+  setSyncState('err');
+  loadingOverlay.classList.add('hidden');
+});
+
+document.getElementById('filterRow').addEventListener('click', (e) => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('.filter-chip').forEach(c => c.dataset.active = 'false');
+  chip.dataset.active = 'true';
+  activeFilter = chip.dataset.val;
+  updateEmptyNote();
+});
+
+function getFilteredRecipes() {
+  if (activeFilter === 'all') return recipes;
+  return recipes.filter(r => r.time === activeFilter);
+}
+
+function updateEmptyNote() {
+  const filtered = getFilteredRecipes();
+  document.getElementById('emptyNote').style.display = filtered.length === 0 ? 'block' : 'none';
+  document.getElementById('rollBtn').disabled = filtered.length === 0;
+}
+
+document.getElementById('rollBtn').addEventListener('click', () => {
+  const filtered = getFilteredRecipes();
+  if (filtered.length === 0) return;
+
+  let pick;
+  if (filtered.length > 1) {
+    const candidates = filtered.filter(r => r.id !== lastPickedId);
+    pick = candidates.length > 0
+      ? candidates[Math.floor(Math.random() * candidates.length)]
+      : filtered[Math.floor(Math.random() * filtered.length)];
+  } else {
+    pick = filtered[0];
+  }
+  lastPickedId = pick.id;
+  renderResult(pick, true);
+});
+
+function renderResult(recipe, animate) {
+  const zone = document.getElementById('resultZone');
+  const timeLabel = recipe.time;
+  zone.innerHTML = `
+    <div class="result-card ${animate ? 'shuffling' : ''}" id="resultCard">
+      ${recipe.photo ? `<img class="result-photo" src="${recipe.photo}" alt="">` : ''}
+      <div class="result-body">
+        <div class="result-stamp">本日のごはん</div>
+        <div class="result-title">${escapeHtml(recipe.name)}</div>
+        <div class="result-tags">
+          <span class="tag time-${timeLabel}">${timeLabel}</span>
+          ${recipe.ingredient ? `<span class="tag ingredient">${escapeHtml(recipe.ingredient)}</span>` : ''}
+        </div>
+        ${recipe.recipe ? `
+        <div class="result-section">
+          <div class="label">作り方メモ</div>
+          <div class="content">${escapeHtml(recipe.recipe)}</div>
+        </div>` : ''}
+        <div class="result-actions">
+          <button class="ghost-btn" id="reRollBtn">もう一回</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('reRollBtn').addEventListener('click', () => {
+    document.getElementById('rollBtn').click();
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
