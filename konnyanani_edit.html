@@ -505,6 +505,38 @@
 
   .recipe-count { font-size: 12px; color: var(--ink-soft); }
 
+  #listFilterRow { margin-bottom: 18px; }
+
+  .group-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 22px 0 10px;
+  }
+  .group-heading:first-child { margin-top: 0; }
+
+  .group-heading .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .group-heading.time-短時間 .dot { background: var(--sage); }
+  .group-heading.time-普通 .dot { background: var(--gold); }
+  .group-heading.time-時間がかかる .dot { background: var(--clay); }
+
+  .group-heading .gname {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .group-heading .gcount {
+    font-size: 11px;
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
+
   .recipe-item {
     background: var(--card);
     border: 1px solid var(--line);
@@ -613,7 +645,7 @@
 
   <div class="tabs">
     <div class="tab active" data-view="pick">今日のごはん</div>
-    <div class="tab" data-view="list">レシピ帖</div>
+    <div class="tab" data-view="list">レシピ帳</div>
   </div>
 
   <!-- PICK VIEW -->
@@ -681,6 +713,13 @@
       <span class="recipe-count" id="recipeCount"></span>
     </div>
 
+    <div class="filter-row" id="listFilterRow">
+      <div class="filter-chip" data-val="all" data-active="true">すべて</div>
+      <div class="filter-chip" data-val="短時間" data-active="false">短時間(15分以内)</div>
+      <div class="filter-chip" data-val="普通" data-active="false">普通(30分前後)</div>
+      <div class="filter-chip" data-val="時間がかかる" data-active="false">時間がかかる(1時間以上)</div>
+    </div>
+
     <div id="recipeList"></div>
   </div>
 
@@ -713,6 +752,7 @@ const recipesCol = collection(db, "recipes");
 let recipes = [];
 let editingId = null;
 let activeFilter = 'all';
+let listFilter = 'all';
 let lastPickedId = null;
 let currentPhotoData = null; // base64 string or null
 let firstSnapshotReceived = false;
@@ -777,14 +817,24 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// --- Filter chips ---
+// --- Filter chips (今日のごはん) ---
 document.getElementById('filterRow').addEventListener('click', (e) => {
   const chip = e.target.closest('.filter-chip');
   if (!chip) return;
-  document.querySelectorAll('.filter-chip').forEach(c => c.dataset.active = 'false');
+  document.querySelectorAll('#filterRow .filter-chip').forEach(c => c.dataset.active = 'false');
   chip.dataset.active = 'true';
   activeFilter = chip.dataset.val;
   updateEmptyNote();
+});
+
+// --- Filter chips (レシピ帳) ---
+document.getElementById('listFilterRow').addEventListener('click', (e) => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('#listFilterRow .filter-chip').forEach(c => c.dataset.active = 'false');
+  chip.dataset.active = 'true';
+  listFilter = chip.dataset.val;
+  renderRecipeList();
 });
 
 function getFilteredRecipes() {
@@ -996,22 +1046,10 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
 });
 
 // --- Recipe list ---
-function renderRecipeList() {
-  const list = document.getElementById('recipeList');
-  const countEl = document.getElementById('recipeCount');
-  countEl.textContent = recipes.length > 0 ? `${recipes.length}件` : '';
+const TIME_ORDER = ['短時間', '普通', '時間がかかる'];
 
-  if (recipes.length === 0) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="big">🍳</div>
-        <p>まだレシピがありません。<br>「+ 新しいレシピを登録する」から追加しましょう。</p>
-      </div>
-    `;
-    return;
-  }
-
-  list.innerHTML = recipes.map(r => `
+function recipeItemHtml(r) {
+  return `
     <div class="recipe-item" data-id="${r.id}">
       ${r.photo
         ? `<img class="recipe-thumb" src="${r.photo}" alt="">`
@@ -1028,7 +1066,60 @@ function renderRecipeList() {
         <button class="icon-btn delete-btn" title="削除" aria-label="削除">🗑️</button>
       </div>
     </div>
-  `).join('');
+  `;
+}
+
+function renderRecipeList() {
+  const list = document.getElementById('recipeList');
+  const countEl = document.getElementById('recipeCount');
+  countEl.textContent = recipes.length > 0 ? `${recipes.length}件` : '';
+
+  if (recipes.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🍳</div>
+        <p>まだレシピがありません。<br>「+ 新しいレシピを登録する」から追加しましょう。</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (listFilter === 'all') {
+    // Grouped view: 短時間 → 普通 → 時間がかかる
+    let html = '';
+    let anyGroup = false;
+    TIME_ORDER.forEach(timeVal => {
+      const group = recipes.filter(r => r.time === timeVal);
+      if (group.length === 0) return;
+      anyGroup = true;
+      html += `
+        <div class="group-heading time-${timeVal}">
+          <span class="dot"></span>
+          <span class="gname">${timeVal}</span>
+          <span class="gcount">${group.length}件</span>
+        </div>
+      `;
+      html += group.map(recipeItemHtml).join('');
+    });
+    if (!anyGroup) {
+      list.innerHTML = `<div class="empty-state"><div class="big">🍳</div><p>レシピがありません。</p></div>`;
+    } else {
+      list.innerHTML = html;
+    }
+  } else {
+    // Single time filter: flat list
+    const filtered = recipes.filter(r => r.time === listFilter);
+    if (filtered.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="big">🍳</div>
+          <p>この条件のレシピはまだありません。</p>
+        </div>
+      `;
+    } else {
+      list.innerHTML = filtered.map(recipeItemHtml).join('');
+    }
+  }
 
   list.querySelectorAll('.edit-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
